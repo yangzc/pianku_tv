@@ -1,7 +1,8 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     repositories {
-        maven{ url "http://nexus.aiqa.knowbox.cn/nexus/content/repositories/releases/"}
+        maven { url "http://nexus-aiqa.knowbox.cn:8085/nexus/content/repositories/releases" }
+        maven { url "http://nexus-aiqa.knowbox.cn:8085/nexus/content/repositories/snapshots" }
         google()
         jcenter()
     }
@@ -15,7 +16,8 @@ buildscript {
 
 allprojects {
     repositories {
-        maven{ url "http://nexus.aiqa.knowbox.cn/nexus/content/repositories/releases/"}
+        maven { url "http://nexus-aiqa.knowbox.cn:8085/nexus/content/repositories/releases" }
+        maven { url "http://nexus-aiqa.knowbox.cn:8085/nexus/content/repositories/snapshots" }
         maven { url 'https://jitpack.io' }
         google()
         jcenter()

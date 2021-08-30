@@ -9,7 +9,6 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.ConsoleMessage;
@@ -21,7 +20,6 @@ import android.webkit.WebViewClient;
 import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 
-import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -51,7 +49,6 @@ public class PKTVFragment extends Fragment {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             WebView.setWebContentsDebuggingEnabled(true);
         }
-//        ((AppCompatActivity)getActivity()).getSupportActionBar().hide();
     }
 
     @Override
@@ -59,7 +56,6 @@ public class PKTVFragment extends Fragment {
             LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState
     ) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_pktv, container, false);
     }
 
@@ -68,7 +64,6 @@ public class PKTVFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         DLNAContainer.getInstance().setDeviceChangeListener(
                 new DLNAContainer.DeviceChangeListener() {
-
                     @Override
                     public void onDeviceChange(Device device) {
                         UiThreadHandler.post(new Runnable() {
@@ -142,7 +137,6 @@ public class PKTVFragment extends Fragment {
                 String url = request.getUrl().toString();
                 if (url.indexOf("pianku") == -1 && url.indexOf("jsdelivr") == -1
                         && url.indexOf("pstatp") == -1  && url.indexOf("qhimg") == -1) {
-                    Log.v("yangzc", request.getUrl().toString());
                     return new WebResourceResponse("html", "utf-8", null);
                 }
                 return super.shouldInterceptRequest(view, request);
@@ -150,23 +144,6 @@ public class PKTVFragment extends Fragment {
 
 
         });
-//        new Thread(() -> {
-//            HttpProvider provider = new HttpProvider();
-//            DataHttpListener listener = new DataHttpListener();
-//            HttpResult result = provider.doGet("https://www.pianku.tv", 30, listener);
-//            if (result.isSuccess()) {
-//                final String html = new String(listener.getData());
-//                Log.v("yangzc", html);
-//                UiThreadHandler.post(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        mWebView.loadDataWithBaseURL("https://www.pianku.tv", html, "text/html", "UTF-8", null);
-//                    }
-//                });
-//            } else {
-//                Log.v("yangzc", "fail!!!");
-//            }
-//        }).start();
         mWebView.loadUrl("http://www.pianku.tv");
         mWebView.setOnKeyListener((view1, i, keyEvent) -> {
             if (keyEvent.getAction() == KeyEvent.ACTION_UP &&
@@ -184,47 +161,26 @@ public class PKTVFragment extends Fragment {
         menu.add("Refresh");
     }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        Log.v("yangzc", "item: " + item.getItemId());
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onContextItemSelected(@NonNull MenuItem item) {
-        Log.v("yangzc", "item: " + item.getItemId());
-        return super.onContextItemSelected(item);
-    }
-
     private ArrayAdapter<String> mAdapter;
 
     private void showDeviceList() {
         startDLNAService();
-        mAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1);
+        mAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
         AlertDialog.Builder listDialog =
                 new AlertDialog.Builder(getContext());
         listDialog.setTitle("设备列表");
         listDialog.setAdapter(mAdapter, (dialog, which) -> {
             List<Device> devices = DLNAContainer.getInstance().getDevices();
-//            Toast.makeText(getContext(),
-//                    "你点击了" + devices.get(which).getFriendlyName(),
-//                    Toast.LENGTH_SHORT).show();
-//            NavHostFragment.findNavController(FirstFragment.this)
-//                    .navigate(R.id.action_FirstFragment_to_SecondFragment);
-
             DLNAContainer.getInstance().setSelectedDevice(devices.get(which));
             startControlActivity();
         });
         listDialog.setCancelable(false);
         AlertDialog dialog = listDialog.create();
-        dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
-            @Override
-            public boolean onKey(DialogInterface dialogInterface, int i, KeyEvent keyEvent) {
-                if (i == KeyEvent.KEYCODE_BACK && keyEvent.getAction() == KeyEvent.ACTION_UP) {
-                    dialogInterface.dismiss();
-                }
-                return false;
+        dialog.setOnKeyListener((dialogInterface, i, keyEvent) -> {
+            if (i == KeyEvent.KEYCODE_BACK && keyEvent.getAction() == KeyEvent.ACTION_UP) {
+                dialogInterface.dismiss();
             }
+            return false;
         });
         dialog.setCanceledOnTouchOutside(false);
         dialog.show();
@@ -242,11 +198,6 @@ public class PKTVFragment extends Fragment {
         }
     }
 
-    private void startDLNAService() {
-        Intent intent = new Intent(getContext(), DLNAService.class);
-        getContext().startService(intent);
-    }
-
     @Override
     public void onResume() {
         super.onResume();
@@ -255,8 +206,13 @@ public class PKTVFragment extends Fragment {
 
     @Override
     public void onDestroy() {
-        stopDLNAService();
         super.onDestroy();
+        stopDLNAService();
+    }
+
+    private void startDLNAService() {
+        Intent intent = new Intent(getContext(), DLNAService.class);
+        getContext().startService(intent);
     }
 
     private void stopDLNAService() {
